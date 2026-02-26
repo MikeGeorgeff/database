@@ -24,6 +24,13 @@ interface ExecutorInterface
     public function fetchCol(SelectInterface $query): array;
 
     /**
+     * Return an associative array with first column as keys, second column as values
+     *
+     * @return array<array-key, mixed>
+     */
+    public function fetchPairs(SelectInterface $query): array;
+
+    /**
      * Fetch the value of the first column of the first row
      */
     public function fetchValue(SelectInterface $query): mixed;

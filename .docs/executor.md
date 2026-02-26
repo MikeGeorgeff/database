@@ -47,6 +47,17 @@ $ids = $executor->fetchCol(
 // [1, 2, 3]
 ```
 
+### fetchPairs
+
+Returns an associative array keyed by the first column with the second column as values.
+
+```php
+$nameById = $executor->fetchPairs(
+    $builder->select(['id', 'name'])->from('users')->where('active', 1)
+);
+// [1 => 'Alice', 2 => 'Bob']
+```
+
 ### fetchValue
 
 Returns the value of the first column of the first matching row.

@@ -49,6 +49,13 @@ final class Executor implements ExecutorInterface
         return $result;
     }
 
+    public function fetchPairs(SelectInterface $query): array
+    {
+        $pdo = $this->connectionManager->getReadConnection();
+
+        return $pdo->fetchPairs($query->toSql(), $query->getBindings());
+    }
+
     public function fetchValue(SelectInterface $query): mixed
     {
         $pdo = $this->connectionManager->getReadConnection();

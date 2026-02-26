@@ -34,10 +34,16 @@ $users = $db->fetchAll(
     $db->select(['id', 'name'])->from('users')->where('active', 1)->orderBy('name', 'ASC')
 );
 
-// Insert a row
+// Fetch key-value pairs (first column as key, second as value)
+$nameById = $db->fetchPairs(
+    $db->select(['id', 'name'])->from('users')->where('active', 1)
+);
+
+// Insert a row and retrieve the generated ID
 $db->fetchAffected(
     $db->insert()->into('users')->column('name', 'Alice')->column('email', 'alice@example.com')
 );
+$id = $db->lastInsertId();
 
 // Update rows
 $db->fetchAffected(

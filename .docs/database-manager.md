@@ -57,6 +57,11 @@ $ids = $manager->fetchCol(
     $manager->select(['id'])->from('users')
 );
 
+// Fetch first two columns as a key-value array
+$nameById = $manager->fetchPairs(
+    $manager->select(['id', 'name'])->from('users')
+);
+
 // Fetch a single scalar value
 $count = $manager->fetchValue(
     $manager->select(['COUNT(*)'])->from('users')
@@ -74,6 +79,34 @@ $statement = $manager->perform(
 ```
 
 See [Executor](executor.md) for details on each method.
+
+## Last insert ID
+
+After an INSERT, retrieve the auto-generated ID from the write connection:
+
+```php
+$manager->fetchAffected(
+    $manager->insert()->into('users')->column('name', 'Alice')
+);
+
+$id = $manager->lastInsertId(); // '42'
+```
+
+For PostgreSQL, pass the sequence name:
+
+```php
+$id = $manager->lastInsertId('users_id_seq');
+```
+
+Returns `null` if no ID is available.
+
+## Connection
+
+```php
+$manager->isConnected();   // bool — whether a connection has been established
+$manager->disconnect();    // close the connection
+$manager->inTransaction(); // bool — whether a transaction is currently active
+```
 
 ## Transactions
 

@@ -138,6 +138,47 @@ class ExecutorTest extends TestCase
         $executor->fetchCol($this->makeSelectQuery());
     }
 
+    public function test_fetch_pairs_returns_key_value_pairs(): void
+    {
+        [$executor, , $readConnection] = $this->makeExecutor();
+
+        $readConnection->method('fetchPairs')->willReturn([1 => 'Alice', 2 => 'Bob']);
+
+        $this->assertSame([1 => 'Alice', 2 => 'Bob'], $executor->fetchPairs($this->makeSelectQuery()));
+    }
+
+    public function test_fetch_pairs_returns_empty_array_when_no_results(): void
+    {
+        [$executor, , $readConnection] = $this->makeExecutor();
+
+        $readConnection->method('fetchPairs')->willReturn([]);
+
+        $this->assertSame([], $executor->fetchPairs($this->makeSelectQuery()));
+    }
+
+    public function test_fetch_pairs_uses_read_connection(): void
+    {
+        [$executor, $connectionManager, $readConnection] = $this->makeExecutor();
+
+        $readConnection->method('fetchPairs')->willReturn([]);
+        $connectionManager->expects($this->once())->method('getReadConnection');
+        $connectionManager->expects($this->never())->method('getWriteConnection');
+
+        $executor->fetchPairs($this->makeSelectQuery());
+    }
+
+    public function test_fetch_pairs_passes_sql_and_bindings(): void
+    {
+        [$executor, , $readConnection] = $this->makeExecutor();
+
+        $readConnection->expects($this->once())
+            ->method('fetchPairs')
+            ->with('SELECT "id", "name" FROM "users"', ['active_0' => 1])
+            ->willReturn([]);
+
+        $executor->fetchPairs($this->makeSelectQuery('SELECT "id", "name" FROM "users"', ['active_0' => 1]));
+    }
+
     public function test_fetch_value_returns_scalar(): void
     {
         [$executor, , $readConnection] = $this->makeExecutor();

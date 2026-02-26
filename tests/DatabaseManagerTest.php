@@ -27,7 +27,7 @@ class DatabaseManagerTest extends TestCase
         $connectionManager->method('getWriteConnection')->willReturn($connection);
         $connectionManager->method('getReadConnection')->willReturn($connection);
 
-        return [new DatabaseManager($connectionManager), $connection];
+        return [new DatabaseManager($connectionManager), $connection, $connectionManager];
     }
 
     public function test_transaction_executes_callback(): void
@@ -223,5 +223,91 @@ class DatabaseManagerTest extends TestCase
         $connection->method('perform')->willReturn($statement);
 
         $this->assertSame($statement, $manager->perform($manager->select()->from('users')));
+    }
+
+    public function test_fetch_pairs_returns_key_value_pairs(): void
+    {
+        [$manager, $connection] = $this->makeManager();
+
+        $connection->method('fetchPairs')->willReturn([1 => 'Alice', 2 => 'Bob']);
+
+        $this->assertSame([1 => 'Alice', 2 => 'Bob'], $manager->fetchPairs($manager->select()->from('users')));
+    }
+
+    public function test_in_transaction_returns_false_when_not_in_transaction(): void
+    {
+        [$manager] = $this->makeManager();
+
+        $this->assertFalse($manager->inTransaction());
+    }
+
+    public function test_in_transaction_returns_true_during_transaction(): void
+    {
+        [$manager] = $this->makeManager();
+
+        $inTransaction = false;
+
+        $manager->transaction(function () use ($manager, &$inTransaction) {
+            $inTransaction = $manager->inTransaction();
+        });
+
+        $this->assertTrue($inTransaction);
+    }
+
+    public function test_last_insert_id_returns_id(): void
+    {
+        [$manager, $connection] = $this->makeManager();
+
+        $connection->method('lastInsertId')->willReturn('42');
+
+        $this->assertSame('42', $manager->lastInsertId());
+    }
+
+    public function test_last_insert_id_returns_null_when_driver_returns_false(): void
+    {
+        [$manager, $connection] = $this->makeManager();
+
+        $connection->method('lastInsertId')->willReturn(false);
+
+        $this->assertNull($manager->lastInsertId());
+    }
+
+    public function test_last_insert_id_passes_sequence_name(): void
+    {
+        [$manager, $connection] = $this->makeManager();
+
+        $connection->expects($this->once())
+            ->method('lastInsertId')
+            ->with('users_id_seq')
+            ->willReturn('5');
+
+        $manager->lastInsertId('users_id_seq');
+    }
+
+    public function test_disconnect_delegates_to_connection_manager(): void
+    {
+        [$manager, , $connectionManager] = $this->makeManager();
+
+        $connectionManager->expects($this->once())->method('disconnect');
+
+        $manager->disconnect();
+    }
+
+    public function test_is_connected_returns_true_when_connected(): void
+    {
+        [$manager, , $connectionManager] = $this->makeManager();
+
+        $connectionManager->method('isConnected')->willReturn(true);
+
+        $this->assertTrue($manager->isConnected());
+    }
+
+    public function test_is_connected_returns_false_when_not_connected(): void
+    {
+        [$manager, , $connectionManager] = $this->makeManager();
+
+        $connectionManager->method('isConnected')->willReturn(false);
+
+        $this->assertFalse($manager->isConnected());
     }
 }

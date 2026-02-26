@@ -25,24 +25,33 @@ final class DatabaseManager implements DatabaseManagerInterface
 
     private readonly ExecutorInterface $executor;
 
-    public function __construct(ConnectionManagerInterface $connectionManager)
+    public function __construct(private readonly ConnectionManagerInterface $connectionManager)
     {
         $this->builder = new QueryBuilder($connectionManager->getDriverName());
         $this->transactionManager = new TransactionManager($connectionManager);
         $this->executor = new Executor($connectionManager);
     }
 
-    /**
-     * @param callable(): mixed $callback
-     */
     public function transaction(callable $callback): mixed
     {
         return $this->transactionManager->execute($callback);
     }
 
-    /**
-     * @param string[] $columns
-     */
+    public function inTransaction(): bool
+    {
+        return $this->transactionManager->isTransacting();
+    }
+
+    public function disconnect(): void
+    {
+        $this->connectionManager->disconnect();
+    }
+
+    public function isConnected(): bool
+    {
+        return $this->connectionManager->isConnected();
+    }
+
     public function select(array $columns = ['*']): SelectInterface
     {
         return $this->builder->select($columns);
@@ -63,51 +72,45 @@ final class DatabaseManager implements DatabaseManagerInterface
         return $this->builder->delete();
     }
 
-    /**
-     * @return null|array<string, mixed>
-     */
     public function fetchOne(SelectInterface $query): ?array
     {
         return $this->executor->fetchOne($query);
     }
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
     public function fetchAll(SelectInterface $query): array
     {
         return $this->executor->fetchAll($query);
     }
 
-    /**
-     * @return array<int, mixed>
-     */
     public function fetchCol(SelectInterface $query): array
     {
         return $this->executor->fetchCol($query);
     }
 
-    /**
-     * Fetch the value of the first column of the first row
-     */
+    public function fetchPairs(SelectInterface $query): array
+    {
+        return $this->executor->fetchPairs($query);
+    }
+
     public function fetchValue(SelectInterface $query): mixed
     {
         return $this->executor->fetchValue($query);
     }
 
-    /**
-     * Performs a statement and returns the number of affected rows
-     */
     public function fetchAffected(InsertInterface|UpdateInterface|DeleteInterface $query): int
     {
         return $this->executor->fetchAffected($query);
     }
 
-    /**
-     * Performs a query after preparing the statement with bound values
-     */
     public function perform(QueryInterface $query): PDOStatement
     {
         return $this->executor->perform($query);
+    }
+
+    public function lastInsertId(?string $name = null): ?string
+    {
+        $id = $this->connectionManager->getWriteConnection()->lastInsertId($name);
+
+        return false === $id ? null : $id;
     }
 }
