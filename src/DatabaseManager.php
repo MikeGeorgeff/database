@@ -102,6 +102,11 @@ final class DatabaseManager implements DatabaseManagerInterface
         return $this->executor->fetchAffected($query);
     }
 
+    public function count(SelectInterface $query): int
+    {
+        return $this->executor->count($query);
+    }
+
     public function perform(QueryInterface $query): PDOStatement
     {
         return $this->executor->perform($query);

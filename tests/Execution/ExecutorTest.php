@@ -275,6 +275,50 @@ class ExecutorTest extends TestCase
         $this->assertSame(5, $executor->fetchAffected($query));
     }
 
+    public function test_count_returns_integer(): void
+    {
+        [$executor, , $readConnection] = $this->makeExecutor();
+
+        $query = $this->createMock(SelectInterface::class);
+        $query->method('toCountSql')->willReturn('SELECT COUNT(*) FROM "users"');
+        $query->method('getBindings')->willReturn([]);
+
+        $readConnection->method('fetchValue')->willReturn(10);
+
+        $this->assertSame(10, $executor->count($query));
+    }
+
+    public function test_count_uses_read_connection(): void
+    {
+        [$executor, $connectionManager, $readConnection] = $this->makeExecutor();
+
+        $query = $this->createMock(SelectInterface::class);
+        $query->method('toCountSql')->willReturn('SELECT COUNT(*) FROM "users"');
+        $query->method('getBindings')->willReturn([]);
+
+        $readConnection->method('fetchValue')->willReturn(0);
+        $connectionManager->expects($this->once())->method('getReadConnection');
+        $connectionManager->expects($this->never())->method('getWriteConnection');
+
+        $executor->count($query);
+    }
+
+    public function test_count_passes_count_sql_and_bindings(): void
+    {
+        [$executor, , $readConnection] = $this->makeExecutor();
+
+        $query = $this->createMock(SelectInterface::class);
+        $query->method('toCountSql')->willReturn('SELECT COUNT(*) FROM "users"');
+        $query->method('getBindings')->willReturn(['active_0' => 1]);
+
+        $readConnection->expects($this->once())
+            ->method('fetchValue')
+            ->with('SELECT COUNT(*) FROM "users"', ['active_0' => 1])
+            ->willReturn(3);
+
+        $executor->count($query);
+    }
+
     public function test_perform_returns_pdo_statement(): void
     {
         [$executor, , , $writeConnection] = $this->makeExecutor();

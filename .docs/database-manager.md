@@ -67,6 +67,11 @@ $count = $manager->fetchValue(
     $manager->select(['COUNT(*)'])->from('users')
 );
 
+// Count matching rows
+$total = $manager->count(
+    $manager->select()->from('users')->where('active', 1)
+);
+
 // Execute a write and return affected row count
 $affected = $manager->fetchAffected(
     $manager->insert()->into('users')->column('name', 'Alice')

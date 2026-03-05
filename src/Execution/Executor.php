@@ -70,6 +70,16 @@ final class Executor implements ExecutorInterface
         return $pdo->fetchAffected($query->toSql(), $query->getBindings());
     }
 
+    public function count(SelectInterface $query): int
+    {
+        $pdo = $this->connectionManager->getReadConnection();
+
+        /** @var int $result */
+        $result = $pdo->fetchValue($query->toCountSql(), $query->getBindings());
+
+        return $result;
+    }
+
     public function perform(QueryInterface $query): PDOStatement
     {
         $pdo = $this->connectionManager->getWriteConnection();

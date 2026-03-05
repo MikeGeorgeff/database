@@ -41,6 +41,11 @@ interface ExecutorInterface
     public function fetchAffected(InsertInterface|UpdateInterface|DeleteInterface $query): int;
 
     /**
+     * Count the query results
+     */
+    public function count(SelectInterface $query): int;
+
+    /**
      * Performs a query after preparing the statement with bound values
      */
     public function perform(QueryInterface $query): PDOStatement;

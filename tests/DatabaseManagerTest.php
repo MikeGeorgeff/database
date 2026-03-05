@@ -176,6 +176,15 @@ class DatabaseManagerTest extends TestCase
         $this->assertNull($manager->fetchValue($manager->select()->from('users')));
     }
 
+    public function test_count_returns_integer(): void
+    {
+        [$manager, $connection] = $this->makeManager();
+
+        $connection->method('fetchValue')->willReturn(7);
+
+        $this->assertSame(7, $manager->count($manager->select()->from('users')));
+    }
+
     public function test_fetch_affected_returns_row_count(): void
     {
         [$manager, $connection] = $this->makeManager();

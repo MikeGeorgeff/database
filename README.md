@@ -39,6 +39,11 @@ $nameById = $db->fetchPairs(
     $db->select(['id', 'name'])->from('users')->where('active', 1)
 );
 
+// Count matching rows
+$total = $db->count(
+    $db->select()->from('users')->where('active', 1)
+);
+
 // Insert a row and retrieve the generated ID
 $db->fetchAffected(
     $db->insert()->into('users')->column('name', 'Alice')->column('email', 'alice@example.com')

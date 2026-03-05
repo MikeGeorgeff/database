@@ -69,6 +69,17 @@ $count = $executor->fetchValue(
 // 42
 ```
 
+### count
+
+Wraps the query in a `COUNT(*)` and returns the result as an integer. This is equivalent to calling `fetchValue` with `toCountSql()` rather than `toSql()`.
+
+```php
+$total = $executor->count(
+    $builder->select()->from('users')->where('active', 1)
+);
+// 42
+```
+
 ---
 
 ## Write methods
