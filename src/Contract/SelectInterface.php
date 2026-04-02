@@ -33,6 +33,14 @@ interface SelectInterface extends WhereInterface, QueryInterface
      */
     public function getPage(): int;
 
+    public function join(string $join, string $spec, string $condition): static;
+
+    public function leftJoin(string $spec, string $condition): static;
+
+    public function rightJoin(string $spec, string $condition): static;
+
+    public function innerJoin(string $spec, string $condition): static;
+
     public function distinct(bool $enable = true): static;
 
     public function toCountSql(): string;

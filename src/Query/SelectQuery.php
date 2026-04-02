@@ -54,6 +54,34 @@ final class SelectQuery implements SelectContract
         return $this;
     }
 
+    public function join(string $join, string $spec, string $condition): static
+    {
+        $join = strtoupper($join);
+
+        if (!in_array($join, ['LEFT', 'INNER', 'RIGHT'], true)) {
+            throw new InvalidArgumentException("Invalid join type [$join]. Join type must be LEFT, RIGHT or INNER");
+        }
+
+        $this->query->join($join, $spec, $condition);
+
+        return $this;
+    }
+
+    public function leftJoin(string $spec, string $condition): static
+    {
+        return $this->join('LEFT', $spec, $condition);
+    }
+
+    public function rightJoin(string $spec, string $condition): static
+    {
+        return $this->join('RIGHT', $spec, $condition);
+    }
+
+    public function innerJoin(string $spec, string $condition): static
+    {
+        return $this->join('INNER', $spec, $condition);
+    }
+
     public function groupBy(array $columns): static
     {
         $this->query->groupBy($columns);

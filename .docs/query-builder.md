@@ -44,6 +44,24 @@ Table-qualified column names are supported. The dot is stripped from the bind pl
 $query->where('users.id', 1); // users.id = :usersid_0
 ```
 
+### JOIN
+
+```php
+$query->join('INNER', 'orders', 'users.id = orders.user_id');
+$query->join('LEFT',  'orders', 'users.id = orders.user_id');
+$query->join('RIGHT', 'orders', 'users.id = orders.user_id');
+```
+
+Helper methods are available for each join type:
+
+```php
+$query->innerJoin('orders',   'users.id = orders.user_id');
+$query->leftJoin('orders',    'users.id = orders.user_id');
+$query->rightJoin('orders',   'users.id = orders.user_id');
+```
+
+The `$join` argument to `join()` is case-insensitive. An `InvalidArgumentException` is thrown for unsupported join types. Multiple joins can be chained.
+
 ### HAVING
 
 ```php

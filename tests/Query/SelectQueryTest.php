@@ -99,6 +99,64 @@ class SelectQueryTest extends TestCase
         $this->assertSame(['total_0' => 5, 'total_1' => 1], $query->getBindings());
     }
 
+    public function test_join(): void
+    {
+        $sql = $this->make()->from('users')->join('INNER', 'orders', 'users.id = orders.user_id')->toSql();
+
+        $this->assertStringContainsString('INNER JOIN', $sql);
+        $this->assertStringContainsString('orders', $sql);
+    }
+
+    public function test_join_type_is_case_insensitive(): void
+    {
+        $sql = $this->make()->from('users')->join('inner', 'orders', 'users.id = orders.user_id')->toSql();
+
+        $this->assertStringContainsString('INNER JOIN', $sql);
+    }
+
+    public function test_join_invalid_type_throws(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('[CROSS]');
+
+        $this->make()->from('users')->join('CROSS', 'orders', 'users.id = orders.user_id');
+    }
+
+    public function test_left_join(): void
+    {
+        $sql = $this->make()->from('users')->leftJoin('orders', 'users.id = orders.user_id')->toSql();
+
+        $this->assertStringContainsString('LEFT JOIN', $sql);
+        $this->assertStringContainsString('orders', $sql);
+    }
+
+    public function test_right_join(): void
+    {
+        $sql = $this->make()->from('users')->rightJoin('orders', 'users.id = orders.user_id')->toSql();
+
+        $this->assertStringContainsString('RIGHT JOIN', $sql);
+        $this->assertStringContainsString('orders', $sql);
+    }
+
+    public function test_inner_join(): void
+    {
+        $sql = $this->make()->from('users')->innerJoin('orders', 'users.id = orders.user_id')->toSql();
+
+        $this->assertStringContainsString('INNER JOIN', $sql);
+        $this->assertStringContainsString('orders', $sql);
+    }
+
+    public function test_multiple_joins(): void
+    {
+        $sql = $this->make()->from('users')
+            ->leftJoin('orders', 'users.id = orders.user_id')
+            ->innerJoin('products', 'orders.product_id = products.id')
+            ->toSql();
+
+        $this->assertStringContainsString('LEFT JOIN', $sql);
+        $this->assertStringContainsString('INNER JOIN', $sql);
+    }
+
     public function test_group_by(): void
     {
         $sql = $this->make(['status', 'COUNT(*) as total'])
