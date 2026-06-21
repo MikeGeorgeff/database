@@ -20,6 +20,11 @@ interface SelectInterface extends WhereInterface, QueryInterface
 
     public function orderBy(string $column, string $direction = 'DESC'): static;
 
+    /**
+     * Reset the order by clause on the select query
+     */
+    public function resetOrderBy(): static;
+
     public function limit(int $limit): static;
 
     public function offset(int $offset): static;

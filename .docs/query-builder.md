@@ -2,6 +2,8 @@
 
 `QueryBuilder` produces query objects for SELECT, INSERT, UPDATE, and DELETE statements. It does not execute queries — pass the resulting query object to an `Executor` or `DatabaseManager`.
 
+> **Note:** The query builder interfaces (`SelectInterface`, `InsertInterface`, `UpdateInterface`, `DeleteInterface`, `WhereInterface`, `QueryInterface`, `QueryBuilderInterface`, `ExecutorInterface`) are consumption contracts — they describe what this package provides and are not designed to be implemented outside of it. Additive changes (new methods) may be introduced in minor releases without a major version bump. Implementing these interfaces in your own code is unsupported.
+
 ```php
 use Georgeff\Database\Query\QueryBuilder;
 
@@ -83,6 +85,20 @@ $query->orderBy('name', 'ASC');   // ORDER BY name ASC
 ```
 
 An `InvalidArgumentException` is thrown if the direction is not `ASC` or `DESC`.
+
+Multiple `orderBy()` calls stack — each call appends to the existing `ORDER BY` clause rather than replacing it:
+
+```php
+$query->orderBy('name', 'ASC')->orderBy('created_at', 'DESC');
+// ORDER BY name ASC, created_at DESC
+```
+
+Use `resetOrderBy()` to clear all previously set ordering before applying a new one:
+
+```php
+$query->orderBy('name', 'ASC')->resetOrderBy()->orderBy('id', 'ASC');
+// ORDER BY id ASC
+```
 
 ### LIMIT and OFFSET
 

@@ -190,6 +190,21 @@ class SelectQueryTest extends TestCase
         $this->make()->from('users')->orderBy('name', 'INVALID');
     }
 
+    public function test_reset_order_by_clears_all_order_by_clauses(): void
+    {
+        $sql = $this->make()
+                    ->from('users')
+                    ->orderBy('name', 'ASC')
+                    ->orderBy('email', 'DESC')
+                    ->resetOrderBy()
+                    ->orderBy('id', 'ASC')
+                    ->toSql();
+
+        $this->assertStringContainsString('id ASC', $sql);
+        $this->assertStringNotContainsString('name', $sql);
+        $this->assertStringNotContainsString('email', $sql);
+    }
+
     public function test_limit(): void
     {
         $sql = $this->make()->from('users')->limit(10)->toSql();

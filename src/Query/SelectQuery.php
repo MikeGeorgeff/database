@@ -102,6 +102,13 @@ final class SelectQuery implements SelectContract
         return $this;
     }
 
+    public function resetOrderBy(): static
+    {
+        $this->query->resetOrderBy();
+
+        return $this;
+    }
+
     public function limit(int $limit): static
     {
         $this->query->limit($limit);
